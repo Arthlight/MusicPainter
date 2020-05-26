@@ -2,4 +2,4 @@ module Spotify-Visualizer
 
 go 1.13
 
-require github.com/go-chi/chi v4.1.1+incompatible // indirect
+require github.com/go-chi/chi v4.1.1+incompatible
