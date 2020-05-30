@@ -20,6 +20,11 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
+	// TODO: Wahrscheinlich hier asynchron eine goroutine callen die alle 3 sekunden requests
+	// TODO: zur spotify api macht und wenn die goroutine eine response bekommt die bestaetigt
+	// TODO: dass der user musik hoert ein event emittet das im frontend "loaded" auf true schaltet
+	// TODO: und dann vermutlich eine weitere goroutine callt die dann die computation macht und ans
+	// TODO: Frontend die noetigen "draw data" sendet.
 	fmt.Println(token.Token)
 	w.WriteHeader(200)
 }
