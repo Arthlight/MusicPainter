@@ -8,7 +8,7 @@ import (
 func NewApiRouter() http.Handler {
 	router := chi.NewRouter()
 
-	router.Post("/refreshToken", RefreshTokenHandler)
+	router.Post("/ws", )
 
 	return router
 }
