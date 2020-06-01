@@ -1,38 +1,8 @@
 package v1
 
-import (
-	"Spotify-Visualizer/models"
-	"fmt"
-	"github.com/gorilla/websocket"
-	"net/http"
-)
 
-var (
-	upgrader = websocket.Upgrader{
-		HandshakeTimeout:  20,
-		ReadBufferSize:    2048,
-		WriteBufferSize:   2048,
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-)
 
-func createNewWebsocket(w http.ResponseWriter, r *http.Request) (*models.WebSocket, error) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil{
-		fmt.Printf("An error occured while trying to upgrade the connection: %v", err)
-		return nil, err
-	}
 
-	ws := &models.WebSocket{
-		Conn:  conn,
-		Out:    make(chan []byte),
-		In:     make(chan []byte),
-		Events: make(map[string]models.EventHandler),
-	}
-
-}
 
 
 
