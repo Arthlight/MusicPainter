@@ -59,7 +59,7 @@ func (w *WebSocket) Reader() {
 			break
 		}
 
-		event, err := newEventFromBinary(message)
+		event, err := NewEventFromBinary(message)
 		if err != nil {
 			fmt.Printf("Error while trying to convert message from binary to struct: %v", err)
 		} else {

@@ -11,7 +11,7 @@ type Event struct {
 	Content interface{} `json:"content"`
 }
 
-func newEventFromBinary(rawData []byte) (*Event,error) {
+func NewEventFromBinary(rawData []byte) (*Event,error) {
 	event := new(Event)
 	err := json.Unmarshal(rawData, event)
 	return event, err
