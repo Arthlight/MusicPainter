@@ -73,9 +73,9 @@ func InitializeAccessToken(accessToken string) {
 	currentAccessToken = accessToken
 }
 
-func UpdateAccessTokenAfter(waitTime int, refreshToken string) {
+func UpdateAccessTokenAfter(timeout int, refreshToken string) {
 	for {
-		time.Sleep(time.Second * time.Duration(waitTime))
+		time.Sleep(time.Second * time.Duration(timeout))
 		accessToken, err := GetAccessToken(refreshToken)
 		if err != nil {
 			fmt.Println("Error receiving Access Token in UpdateAccessTokenAfter: ", err)
@@ -103,25 +103,62 @@ func getCurrentTrackID() (string, bool){
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me/player/currently-playing", nil)
 	if err != nil {
 		fmt.Printf("Error while trying to create a new request in getCurrentTrackID: %v", err)
+		return "", false
 	}
 	request.Header.Set("Authorization", currentAccessToken)
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error while trying to send request in getCurrentTrackID: ", err)
+		return "", false
 	}
 	defer response.Body.Close()
+
+	// The check "contentLength == 0" may be insufficient and I might need to provide more complex measures
+	// in order to assure that the response.Body is actually empty
+	if response.StatusCode == 204 || response.ContentLength == 0 {
+		return "", false
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("Error while trying to read response body in getCurrentTrackID: ", err)
+		return "", false
+	}
+	var flags struct {
+		isPlaying bool `json:"is_playing"`
+		id string `json:"id"`
+	}
+	err = json.Unmarshal(body, &flags)
+	if err != nil {
+		fmt.Println("Error while trying to unmarshal response body in getCurrentTrackID: ", err)
+		return "", false
+	}
+	if !flags.isPlaying {
+		return "", false
+	}
+
+	return flags.id, true
+
+
+
 
 	// TODO: Check whether the response.StatusCode is 200 or 204 and whether "currently_playing" is set to true. In case it is
 	// TODO: set to True and the statuscode is 200, return the track ID of the song (make sure to actually return the track
 	// TODO: id of the song and not the album)
 }
 
-
-
+// TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann immer werte von der current track id
+// TODO: in einer separaten function nochmal hole und eine calculatete anzahl ein punkten die in eine bestimmte richtung
+// TODO: gehen ans frontend zurücksende, bevor ich dann die richtung wechsel und sich der prozess wiederholt. Am Anfang
+// TODO: des while loops hol ich mir dann immer wieder neu werte von der trackID die sich geändert haben könnte und passe
+// TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
 func ComputeNextCoordinatesFromSongInfo(x, y int) {
 	for {
 		if currentTrackID != "" {
-
+			audioFeatures, err := getAudioFeaturesOfTrack()
 		}
 	}
+}
+
+func getAudioFeaturesOfTrack() {
+
 }

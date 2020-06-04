@@ -24,6 +24,5 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		go spotify.LookForCurrentlyPlayingSongWithTimeOut(3)
 		go spotify.ComputeNextCoordinatesFromSongInfo(frontend.X, frontend.Y)
 
-
 	})
 }
