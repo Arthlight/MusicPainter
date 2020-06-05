@@ -16,6 +16,13 @@ import (
 
 var currentAccessToken string
 var currentTrackID string
+var TrackResponse struct {
+	IsPlaying bool `json:"is_playing"`
+	Item struct {
+		Name string `json:"name"`
+		ID string `json:"id"`
+	} `json:"item"`
+}
 
 func GetAccessToken(refreshToken string) (string, error) {
 	client := http.Client{}
@@ -88,7 +95,7 @@ func UpdateAccessTokenAfter(timeout int, refreshToken string) {
 // TODO: So dont forget to send a notification into the "out" channel of the socket here later on
 func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 	for {
-		trackID, ok := getCurrentTrackID()
+		trackID, ok := GetCurrentTrackID()
 		if ok {
 			// TODO: send a notification to the frontend that user is currently playing a song
 			currentTrackID = trackID
@@ -98,14 +105,14 @@ func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 }
 
 
-func getCurrentTrackID() (string, bool){
+func GetCurrentTrackID() (string, bool){
 	client := http.Client{}
 	request, err := http.NewRequest("GET", "https://api.spotify.com/v1/me/player/currently-playing", nil)
 	if err != nil {
 		fmt.Printf("Error while trying to create a new request in getCurrentTrackID: %v", err)
 		return "", false
 	}
-	request.Header.Set("Authorization", currentAccessToken)
+	request.Header.Set("Authorization", "Bearer " + currentAccessToken)
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error while trying to send request in getCurrentTrackID: ", err)
@@ -123,27 +130,18 @@ func getCurrentTrackID() (string, bool){
 		fmt.Println("Error while trying to read response body in getCurrentTrackID: ", err)
 		return "", false
 	}
-	var flags struct {
-		isPlaying bool `json:"is_playing"`
-		id string `json:"id"`
-	}
-	err = json.Unmarshal(body, &flags)
+	err = json.Unmarshal(body, &TrackResponse)
 	if err != nil {
 		fmt.Println("Error while trying to unmarshal response body in getCurrentTrackID: ", err)
 		return "", false
 	}
-	if !flags.isPlaying {
+	fmt.Println(string(body))
+	if !TrackResponse.IsPlaying {
 		return "", false
 	}
 
-	return flags.id, true
+	return TrackResponse.Item.ID, true
 
-
-
-
-	// TODO: Check whether the response.StatusCode is 200 or 204 and whether "currently_playing" is set to true. In case it is
-	// TODO: set to True and the statuscode is 200, return the track ID of the song (make sure to actually return the track
-	// TODO: id of the song and not the album)
 }
 
 // TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann immer werte von der current track id
@@ -154,7 +152,7 @@ func getCurrentTrackID() (string, bool){
 func ComputeNextCoordinatesFromSongInfo(x, y int) {
 	for {
 		if currentTrackID != "" {
-			audioFeatures, err := getAudioFeaturesOfTrack()
+			//audioFeatures, err := getAudioFeaturesOfTrack()
 		}
 	}
 }

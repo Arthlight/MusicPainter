@@ -4,6 +4,7 @@ import (
 	"Spotify-Visualizer/spotify"
 	"fmt"
 )
+
 //const port = ":4000"
 
 func main() {
@@ -14,5 +15,7 @@ func main() {
 	fmt.Printf("Started http server on %s\n", port)
 	err := http.ListenAndServe(port, router)
 	fmt.Println(err)*/
-	fmt.Println(spotify.GetAccessToken(""))
+	//fmt.Println(spotify.GetAccessToken(""))
+	str, ok := spotify.GetCurrentTrackID()
+	fmt.Println(str, ok)
 }
