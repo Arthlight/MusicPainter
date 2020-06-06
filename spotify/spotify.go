@@ -14,15 +14,11 @@ import (
 	"time"
 )
 
+var x, y int
 var currentAccessToken string
 var currentTrackID string
-var TrackResponse struct {
-	IsPlaying bool `json:"is_playing"`
-	Item struct {
-		Name string `json:"name"`
-		ID string `json:"id"`
-	} `json:"item"`
-}
+var trackResponse models.TrackResponse
+var audioFeatures models.AudioFeatures
 
 func GetAccessToken(refreshToken string) (string, error) {
 	client := http.Client{}
@@ -99,6 +95,8 @@ func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 		if ok {
 			// TODO: send a notification to the frontend that user is currently playing a song
 			currentTrackID = trackID
+			//SetCurrentAudioFeaturesOfTrack()
+
 		}
 		time.Sleep(time.Second * time.Duration(timeout))
 	}
@@ -130,18 +128,22 @@ func GetCurrentTrackID() (string, bool){
 		fmt.Println("Error while trying to read response body in getCurrentTrackID: ", err)
 		return "", false
 	}
-	err = json.Unmarshal(body, &TrackResponse)
+	err = json.Unmarshal(body, &trackResponse)
 	if err != nil {
 		fmt.Println("Error while trying to unmarshal response body in getCurrentTrackID: ", err)
 		return "", false
 	}
 	fmt.Println(string(body))
-	if !TrackResponse.IsPlaying {
+	if !trackResponse.IsPlaying {
 		return "", false
 	}
 
-	return TrackResponse.Item.ID, true
+	return trackResponse.ID, true
+}
 
+func SetXAndY(canvasX, canvasY int) {
+	x = canvasX
+	y = canvasY
 }
 
 // TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann immer werte von der current track id
@@ -149,14 +151,39 @@ func GetCurrentTrackID() (string, bool){
 // TODO: gehen ans frontend zurücksende, bevor ich dann die richtung wechsel und sich der prozess wiederholt. Am Anfang
 // TODO: des while loops hol ich mir dann immer wieder neu werte von der trackID die sich geändert haben könnte und passe
 // TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
-func ComputeNextCoordinatesFromSongInfo(x, y int) {
+func ComputeNextCoordinatesFromSongInfo() {
 	for {
 		if currentTrackID != "" {
-			//audioFeatures, err := getAudioFeaturesOfTrack()
+
 		}
 	}
 }
 
-func getAudioFeaturesOfTrack() {
+func SetCurrentAudioFeaturesOfTrack(trackid string, at string) *models.AudioFeatures {
+	client := http.Client{}
+	trackURL := fmt.Sprintf("https://api.spotify.com/v1/audio-features/%s", trackid)
+	request, err := http.NewRequest("GET", trackURL, nil)
+	if err != nil {
+		fmt.Printf("Error while trying to create a new request in SetCurrentAudioFeaturesOfTrack: %v", err)
+		return nil
+	}
+	request.Header.Set("Authorization", "Bearer " + at)
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("Error while trying to send request in SetCurrentAudioFeaturesOfTrack: ", err)
+		return nil
+	}
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("Error reading response body in SetCurrentAudioFeaturesOfTrack: ", err)
+	}
+	fmt.Println(string(body))
+	err = json.Unmarshal(body, &audioFeatures)
+
+	return &audioFeatures
 
 }

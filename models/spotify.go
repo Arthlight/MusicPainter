@@ -20,4 +20,11 @@ type AudioFeatures struct {
 	Valence          float64 `json:"valence"`
 	Tempo            float64 `json:"tempo"`
 }
-
+type item struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+type TrackResponse struct {
+	IsPlaying bool `json:"is_playing"`
+	item `json:"item"`
+}
