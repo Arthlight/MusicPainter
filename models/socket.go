@@ -20,7 +20,7 @@ var (
 type WebSocket struct {
 	Conn *websocket.Conn
 	Out chan []byte
-	In chan []byte
+	In <-chan []byte
 	Events map[string]EventHandler
 }
 
@@ -34,7 +34,7 @@ func CreateNewWebsocket(w http.ResponseWriter, r *http.Request) (*WebSocket, err
 	ws := &WebSocket{
 		Conn:  conn,
 		Out:    make(chan []byte),
-		In:     make(chan []byte),
+		In:     make(<-chan []byte),
 		Events: make(map[string]EventHandler),
 	}
 

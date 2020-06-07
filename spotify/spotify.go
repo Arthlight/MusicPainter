@@ -19,6 +19,17 @@ var currentAccessToken string
 var currentTrackID string
 var trackResponse models.TrackResponse
 var audioFeatures models.AudioFeatures
+var out *chan []byte
+
+
+func SetPipeline(cptr *chan []byte) {
+	out = cptr
+}
+
+func SetXAndY(canvasX, canvasY int) {
+	x = canvasX
+	y = canvasY
+}
 
 func GetAccessToken(refreshToken string) (string, error) {
 	client := http.Client{}
@@ -95,13 +106,13 @@ func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 		if ok {
 			// TODO: send a notification to the frontend that user is currently playing a song
 			currentTrackID = trackID
-			//SetCurrentAudioFeaturesOfTrack()
+			SetCurrentAudioFeaturesOfTrack()
+			computeNextCoordinatesFromSongInfo()
 
 		}
 		time.Sleep(time.Second * time.Duration(timeout))
 	}
 }
-
 
 func GetCurrentTrackID() (string, bool){
 	client := http.Client{}
@@ -141,40 +152,22 @@ func GetCurrentTrackID() (string, bool){
 	return trackResponse.ID, true
 }
 
-func SetXAndY(canvasX, canvasY int) {
-	x = canvasX
-	y = canvasY
-}
-
-// TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann immer werte von der current track id
-// TODO: in einer separaten function nochmal hole und eine calculatete anzahl ein punkten die in eine bestimmte richtung
-// TODO: gehen ans frontend zurücksende, bevor ich dann die richtung wechsel und sich der prozess wiederholt. Am Anfang
-// TODO: des while loops hol ich mir dann immer wieder neu werte von der trackID die sich geändert haben könnte und passe
-// TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
-func ComputeNextCoordinatesFromSongInfo() {
-	for {
-		if currentTrackID != "" {
-
-		}
-	}
-}
-
-func SetCurrentAudioFeaturesOfTrack(trackid string, at string) *models.AudioFeatures {
+func SetCurrentAudioFeaturesOfTrack() {
 	client := http.Client{}
-	trackURL := fmt.Sprintf("https://api.spotify.com/v1/audio-features/%s", trackid)
+	trackURL := fmt.Sprintf("https://api.spotify.com/v1/audio-features/%s", currentTrackID)
 	request, err := http.NewRequest("GET", trackURL, nil)
 	if err != nil {
 		fmt.Printf("Error while trying to create a new request in SetCurrentAudioFeaturesOfTrack: %v", err)
-		return nil
+		return
 	}
-	request.Header.Set("Authorization", "Bearer " + at)
+	request.Header.Set("Authorization", "Bearer " + currentAccessToken)
 	request.Header.Set("Accept", "application/json")
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error while trying to send request in SetCurrentAudioFeaturesOfTrack: ", err)
-		return nil
+		return
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
@@ -183,7 +176,18 @@ func SetCurrentAudioFeaturesOfTrack(trackid string, at string) *models.AudioFeat
 	}
 	fmt.Println(string(body))
 	err = json.Unmarshal(body, &audioFeatures)
+}
 
-	return &audioFeatures
+// TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann eine calculatete anzahl ein punkten die in eine bestimmte richtung
+// TODO: gehen ans frontend zurücksende, bevor ich dann die richtung wechsel und sich der prozess wiederholt. Am Anfang
+// TODO: des while loops hol ich mir dann immer wieder neu werte von der trackID die sich geändert haben könnte und passe
+// TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
+func computeNextCoordinatesFromSongInfo() {
+	for {
+		color := getColorForCurrentTrack
+	}
+}
+
+func getColorForCurrentTrack() models.RGB {
 
 }
