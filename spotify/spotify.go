@@ -188,6 +188,6 @@ func computeNextCoordinatesFromSongInfo() {
 	}
 }
 
-func getColorForCurrentTrack() models.RGB {
+func getColorForCurrentTrack() []models.RGB {
 
 }
