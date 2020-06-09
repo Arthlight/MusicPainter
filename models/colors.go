@@ -55,29 +55,28 @@ type SadColorsCollection struct {
 	
 }
 
-
 var WarmColors = WarmColorsCollection{
-	RGB {
+	WarmOrange: RGB {
 		Red:   255,
 		Green: 114,
 		Blue:  81,
 	},
-	RGB{
+	WarmYellow: RGB{
 		Red:   247,
 		Green: 235,
 		Blue:  48,
 	},
-	RGB{
+	WarmRed: RGB{
 		Red:   220,
 		Green: 72,
 		Blue:  8,
 	},
-	RGB{
+	WarmMagenta: RGB{
 		Red:   250,
 		Green: 154,
 		Blue:  251,
 	},
-	RGB{
+	WarmPink: RGB{
 		Red:   250,
 		Green: 132,
 		Blue:  149,

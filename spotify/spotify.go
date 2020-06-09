@@ -14,7 +14,8 @@ import (
 	"time"
 )
 
-var x, y int
+var maxX, maxY int
+var recentX, recentY int
 var currentAccessToken string
 var currentTrackID string
 var trackResponse models.TrackResponse
@@ -27,8 +28,8 @@ func SetPipeline(cptr *chan []byte) {
 }
 
 func SetXAndY(canvasX, canvasY int) {
-	x = canvasX
-	y = canvasY
+	maxX = canvasX
+	maxY = canvasY
 }
 
 func GetAccessToken(refreshToken string) (string, error) {
@@ -176,6 +177,7 @@ func SetCurrentAudioFeaturesOfTrack() {
 	}
 	fmt.Println(string(body))
 	err = json.Unmarshal(body, &audioFeatures)
+	fmt.Println(audioFeatures)
 }
 
 // TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann eine calculatete anzahl ein punkten die in eine bestimmte richtung
@@ -184,10 +186,56 @@ func SetCurrentAudioFeaturesOfTrack() {
 // TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
 func computeNextCoordinatesFromSongInfo() {
 	for {
-		color := getColorForCurrentTrack
+		colorPalette := getColorForCurrentTrack()
 	}
 }
 
-func getColorForCurrentTrack() []models.RGB {
-
+func getColorForCurrentTrack() [5]models.RGB {
+	switch EnergyAndDanceability := audioFeatures.Danceability + audioFeatures.Energy; {
+	case EnergyAndDanceability > 1.4:
+		currentColors := models.FunkyColors
+		return [5]models.RGB{
+			currentColors.FunkyOrange,
+			currentColors.FunkyDarkBlue,
+			currentColors.FunkyLightBlue,
+			currentColors.FunkyLightGreen,
+			currentColors.FunkyDarkGreen,
+		}
+	case EnergyAndDanceability > 1.1:
+		currentColors := models.WarmColors
+		return [5]models.RGB{
+			currentColors.WarmRed,
+			currentColors.WarmOrange,
+			currentColors.WarmPink,
+			currentColors.WarmMagenta,
+			currentColors.WarmYellow,
+		}
+	case EnergyAndDanceability > 1.0:
+		currentColors := models.ConfidentColors
+		return [5]models.RGB{
+			currentColors.ConfidentPink,
+			currentColors.ConfidentMagenta,
+			currentColors.ConfidentRed,
+			currentColors.ConfidentOrange,
+			currentColors.ConfidentYellow,
+		}
+	case EnergyAndDanceability > 0.8:
+		currentColors := models.RelaxedColors
+		return [5]models.RGB{
+			currentColors.RelaxedPink,
+			currentColors.RelaxedYellow,
+			currentColors.RelaxedBrown,
+			currentColors.RelaxedOrange,
+			currentColors.RelaxedBlue,
+		}
+	default:
+		currentColors := models.SadColors
+		return [5]models.RGB{
+			currentColors.SadDarkOrange,
+			currentColors.SadLightOrange,
+			currentColors.SadGreen,
+			currentColors.SadRed,
+			currentColors.SadBlue,
+		}
+	}
 }
