@@ -13,14 +13,13 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Error while trying to create new Websocket Connection: %v", err)
 	}
 
-	// TODO: Vllt. muss ich die Websocket connection weiterreichen in das spotify module, also sowas wie
-	// TODO: SetWebsocketOut zb, also das ich nichtmal die gesamte websocket weiterreiche aber zumindest den Out
-	// TODO: Channel, damit ich innerhalb des Spotify Modules die neuen coordinates ans frontend senden kann.
 	ws.On("refresh_token", func(event *models.Event) {
 		frontend := event.Content.(models.Frontend)
 		accessToken, err := spotify.GetAccessToken(frontend.RefreshToken)
 		if err != nil {
 			fmt.Printf("Unable to get Access Token: %v", err)
+			return // TODO: Maybe enhance this a little bit here and send a notif to the frontend that the refreshtoken
+			       // TODO: is expired, but you can't know that here for certain so additional checks would be required for that
 		}
 		spotify.InitializeAccessToken(accessToken)
 		spotify.SetXAndY(frontend.X, frontend.Y)

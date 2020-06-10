@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/joho/godotenv/autoload"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -177,17 +178,25 @@ func SetCurrentAudioFeaturesOfTrack() {
 	}
 	fmt.Println(string(body))
 	err = json.Unmarshal(body, &audioFeatures)
-	fmt.Println(audioFeatures)
 }
 
 // TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann eine calculatete anzahl ein punkten die in eine bestimmte richtung
 // TODO: gehen ans frontend zurücksende, bevor ich dann die richtung wechsel und sich der prozess wiederholt. Am Anfang
 // TODO: des while loops hol ich mir dann immer wieder neu werte von der trackID die sich geändert haben könnte und passe
 // TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
+// Y: 829 – X: 1680
 func computeNextCoordinatesFromSongInfo() {
-	for {
-		colorPalette := getColorForCurrentTrack()
+	colorPalette := getColorForCurrentTrack()
+	ellipseWidth, ellipseHeight := getEllipseWidthHeight()
+	stepRange := getStepRange()
+
+	rand.Seed(time.Now().UnixNano())
+	numberOfSteps := rand.Intn(stepRange[1] - stepRange[0]) + stepRange[0]
+
+	for !isPositionOnCanvas(positionAfterStep()) {
+
 	}
+
 }
 
 func getColorForCurrentTrack() [5]models.RGB {
@@ -239,3 +248,37 @@ func getColorForCurrentTrack() [5]models.RGB {
 		}
 	}
 }
+
+func getEllipseWidthHeight() (float64, float64) {
+	value := audioFeatures.Liveness * 10
+
+	return value, value
+}
+
+func getStepRange() [2]int {
+	switch {
+	case audioFeatures.Tempo > 150:
+		return [2]int{1, 4}
+	case audioFeatures.Tempo > 140:
+		return [2]int{2, 7}
+	case audioFeatures.Tempo > 120:
+		return [2]int{3, 9}
+	case audioFeatures.Tempo > 100:
+		return [2]int{4, 13}
+	case audioFeatures.Tempo > 80:
+		return [2]int{8, 20}
+	case audioFeatures.Tempo > 60:
+		return [2]int{10, 25}
+	default:
+		return [2]int{11, 27}
+	}
+}
+
+func positionAfterStep() (int, int) {
+
+}
+
+func isPositionOnCanvas(x, y int) bool {
+
+}
+
