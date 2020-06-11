@@ -192,9 +192,14 @@ func computeNextCoordinatesFromSongInfo() {
 
 	rand.Seed(time.Now().UnixNano())
 	numberOfSteps := rand.Intn(stepRange[1] - stepRange[0]) + stepRange[0]
+	currentDirection := rand.Intn(7)
 
-	for !isPositionOnCanvas(positionAfterStep()) {
+	for numberOfSteps >= 0 && isPositionOnCanvas(positionAfterStep(numberOfSteps)) {
+		randomColorIndex := rand.Intn(len(colorPalette))
+		currentColor := colorPalette[randomColorIndex]
 
+
+		numberOfSteps--
 	}
 
 }
@@ -274,7 +279,7 @@ func getStepRange() [2]int {
 	}
 }
 
-func positionAfterStep() (int, int) {
+func positionAfterStep(numberOfSteps int) (int, int) {
 
 }
 
