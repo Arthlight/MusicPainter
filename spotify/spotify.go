@@ -16,7 +16,7 @@ import (
 )
 
 var maxX, maxY int
-var recentX, recentY int
+var recentX, recentY = 30, 30
 var currentAccessToken string
 var currentTrackID string
 var trackResponse models.TrackResponse
@@ -189,12 +189,13 @@ func computeNextCoordinatesFromSongInfo() {
 	colorPalette := getColorForCurrentTrack()
 	ellipseWidth, ellipseHeight := getEllipseWidthHeight()
 	stepRange := getStepRange()
+	stepSize := getRandomNumInRange(int(audioFeatures.Valence), int(2 * audioFeatures.Valence))
 
 	rand.Seed(time.Now().UnixNano())
-	numberOfSteps := rand.Intn(stepRange[1] - stepRange[0]) + stepRange[0]
+	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
 	currentDirection := rand.Intn(7)
 
-	for numberOfSteps >= 0 && isPositionOnCanvas(positionAfterStep(numberOfSteps)) {
+	for numberOfSteps >= 0 && isPositionOnCanvas(positionAfterStep(stepSize, currentDirection)) {
 		randomColorIndex := rand.Intn(len(colorPalette))
 		currentColor := colorPalette[randomColorIndex]
 
@@ -263,13 +264,13 @@ func getEllipseWidthHeight() (float64, float64) {
 func getStepRange() [2]int {
 	switch {
 	case audioFeatures.Tempo > 150:
-		return [2]int{1, 4}
+		return [2]int{2, 4}
 	case audioFeatures.Tempo > 140:
-		return [2]int{2, 7}
+		return [2]int{3, 7}
 	case audioFeatures.Tempo > 120:
-		return [2]int{3, 9}
+		return [2]int{4, 10}
 	case audioFeatures.Tempo > 100:
-		return [2]int{4, 13}
+		return [2]int{5, 13}
 	case audioFeatures.Tempo > 80:
 		return [2]int{8, 20}
 	case audioFeatures.Tempo > 60:
@@ -279,11 +280,42 @@ func getStepRange() [2]int {
 	}
 }
 
-func positionAfterStep(numberOfSteps int) (int, int) {
+func positionAfterStep(stepSize, currentDirection int) []int {
+	switch currentDirection {
+	case 0:
+		// go up
+		return []int{recentX, recentY - stepSize}
+	case 1:
+		// go up-right
+		return []int{recentX + stepSize, recentY - stepSize}
+	case 2:
+		// go up-left
+		return []int{recentX - stepSize, recentY - stepSize}
+	case 3:
+		// go left
+		return []int{recentX - stepSize, recentY}
+	case 4:
+		// go right
+		return []int{recentX + stepSize, recentY}
+	case 5:
+		// go down-right
+		return []int{recentX + stepSize, recentY + stepSize}
+	case 6:
+		// go down-left
+		return []int{recentX - stepSize, recentY + stepSize}
+	case 7:
+		// go down
+		return []int{recentX, recentY + stepSize}
+	default:
+		panic("Invalid case in switch statement: func positionAfterStep(int, int) []int")
+	}
+}
+
+func isPositionOnCanvas(coordinates []int) bool {
 
 }
 
-func isPositionOnCanvas(x, y int) bool {
-
+func getRandomNumInRange(min, max int) int {
+	return rand.Intn(max - min) + min
 }
 

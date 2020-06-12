@@ -25,6 +25,6 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		spotify.SetXAndY(frontend.X, frontend.Y)
 		spotify.SetPipeline(&ws.Out)
 		go spotify.UpdateAccessTokenAfter(50, frontend.RefreshToken)
-		go spotify.LookForCurrentlyPlayingSongWithTimeOut(3)
+		go spotify.LookForCurrentlyPlayingSongWithTimeOut(2)
 	})
 }
