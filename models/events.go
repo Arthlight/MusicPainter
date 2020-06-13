@@ -17,6 +17,6 @@ func NewEventFromBinary(rawData []byte) (*Event,error) {
 	return event, err
 }
 
-func (e *Event) toBinary() ([]byte, error) {
-	return json.Marshal(e)
+func (e *Event) ToBinary() ([]byte, error) {
+	return json.Marshal(*e)
 }

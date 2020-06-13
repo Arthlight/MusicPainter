@@ -14,7 +14,7 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws.On("refresh_token", func(event *models.Event) {
-		frontend := event.Content.(models.Frontend)
+		frontend := event.Content.(models.FromFrontend)
 		accessToken, err := spotify.GetAccessToken(frontend.RefreshToken)
 		if err != nil {
 			fmt.Printf("Unable to get Access Token: %v", err)
@@ -25,6 +25,6 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		spotify.SetXAndY(frontend.X, frontend.Y)
 		spotify.SetPipeline(&ws.Out)
 		go spotify.UpdateAccessTokenAfter(50, frontend.RefreshToken)
-		go spotify.LookForCurrentlyPlayingSongWithTimeOut(2)
+		go spotify.LookForCurrentlyPlayingSongWithTimeOut(2) // TODO: Does this need to be a goroutine?
 	})
 }

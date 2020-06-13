@@ -106,14 +106,26 @@ func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 	for {
 		trackID, ok := GetCurrentTrackID()
 		if ok {
-			// TODO: send a notification to the frontend that user is currently playing a song
 			currentTrackID = trackID
+			notifyFrontend()
 			SetCurrentAudioFeaturesOfTrack()
-			computeNextCoordinatesFromSongInfo()
-
+			sendNextCoordinatesFromSongInfoToFrontend()
 		}
 		time.Sleep(time.Second * time.Duration(timeout))
 	}
+}
+
+func notifyFrontend() {
+	isPlaying := map[string]bool{"isPlaying": true}
+	frontendData := &models.Event{
+		Name:    "isPlaying",
+		Content: isPlaying,
+	}
+	rawFrontendData, err := frontendData.ToBinary()
+	if err != nil {
+		fmt.Println("Error while trying to marshal frontendData in notifyFrontend: ", err)
+	}
+	*out <- rawFrontendData
 }
 
 func GetCurrentTrackID() (string, bool){
@@ -180,26 +192,21 @@ func SetCurrentAudioFeaturesOfTrack() {
 	err = json.Unmarshal(body, &audioFeatures)
 }
 
-// TODO: Hier hab ich wahrsch auch einen while loop wodrin ich mir dann eine calculatete anzahl ein punkten die in eine bestimmte richtung
-// TODO: gehen ans frontend zurücksende, bevor ich dann die richtung wechsel und sich der prozess wiederholt. Am Anfang
-// TODO: des while loops hol ich mir dann immer wieder neu werte von der trackID die sich geändert haben könnte und passe
-// TODO: dadurch dann ggf. den ouput den ich zurücksende ans frontend an (neue kreisgroeße, farbe, form etc)
-// Y: 829 – X: 1680
-func computeNextCoordinatesFromSongInfo() {
+func sendNextCoordinatesFromSongInfoToFrontend() {
 	colorPalette := getColorForCurrentTrack()
 	ellipseWidth, ellipseHeight := getEllipseWidthHeight()
 	stepRange := getStepRange()
 	stepSize := getRandomNumInRange(int(audioFeatures.Valence), int(2 * audioFeatures.Valence))
-
-	rand.Seed(time.Now().UnixNano())
 	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
-	currentDirection := rand.Intn(7)
+	currentDirection := getRandomNumInRange(0, 7)
 
 	for numberOfSteps >= 0 && isPositionOnCanvas(positionAfterStep(stepSize, currentDirection)) {
 		randomColorIndex := rand.Intn(len(colorPalette))
 		currentColor := colorPalette[randomColorIndex]
-
-
+		err := sendToFrontend(currentColor, stepSize, int(ellipseHeight), int(ellipseWidth), recentX, recentY, trackResponse.Name)
+		if err != nil {
+			fmt.Println("Error while trying to send data to frontend: ", err)
+		}
 		numberOfSteps--
 	}
 
@@ -284,38 +291,76 @@ func positionAfterStep(stepSize, currentDirection int) []int {
 	switch currentDirection {
 	case 0:
 		// go up
-		return []int{recentX, recentY - stepSize}
+		recentY = recentY - stepSize
+		return []int{recentX, recentY}
 	case 1:
 		// go up-right
-		return []int{recentX + stepSize, recentY - stepSize}
+		recentX = recentX + stepSize
+		recentY = recentY - stepSize
+		return []int{recentX, recentY}
 	case 2:
 		// go up-left
-		return []int{recentX - stepSize, recentY - stepSize}
+		recentX = recentX - stepSize
+		recentY = recentY - stepSize
+		return []int{recentX, recentY}
 	case 3:
 		// go left
-		return []int{recentX - stepSize, recentY}
+		recentX = recentX - stepSize
+		return []int{recentX, recentY}
 	case 4:
 		// go right
-		return []int{recentX + stepSize, recentY}
+		recentX = recentX + stepSize
+		return []int{recentX, recentY}
 	case 5:
 		// go down-right
-		return []int{recentX + stepSize, recentY + stepSize}
+		recentX = recentX + stepSize
+		recentY = recentY + stepSize
+		return []int{recentX, recentY}
 	case 6:
 		// go down-left
-		return []int{recentX - stepSize, recentY + stepSize}
+		recentX = recentX - stepSize
+		recentY = recentY + stepSize
+		return []int{recentX, recentY}
 	case 7:
 		// go down
-		return []int{recentX, recentY + stepSize}
+		recentY = recentY + stepSize
+		return []int{recentX, recentY}
 	default:
-		panic("Invalid case in switch statement: func positionAfterStep(int, int) []int")
+		panic("Invalid case in switch statement")
 	}
 }
 
+// Y: 829 | X: 1680
 func isPositionOnCanvas(coordinates []int) bool {
-
+	currentX, currentY := coordinates[0], coordinates[1]
+	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0
 }
 
 func getRandomNumInRange(min, max int) int {
+	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(max - min) + min
+}
+
+func sendToFrontend(currentColor models.RGB, stepSize int, ellipseHeight int, ellipseWidth int, x int, y int, songName string) error {
+	dataPackage := models.ForFrontend{
+		StepSize:      stepSize,
+		ColorPalette:  currentColor,
+		EllipseHeight: ellipseHeight,
+		EllipseWidth:  ellipseWidth,
+		X:             x,
+		Y:             y,
+		SongName:      songName,
+	}
+	frontendData := &models.Event{
+		Name:    "data",
+		Content: dataPackage,
+	}
+	rawFrontendData, err := frontendData.ToBinary()
+	if err != nil {
+		return err
+	}
+	*out <- rawFrontendData
+
+	return nil
 }
 
