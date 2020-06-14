@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type EventHandler func(event *Event)
@@ -17,6 +18,11 @@ func NewEventFromBinary(rawData []byte) (*Event,error) {
 	return event, err
 }
 
-func (e *Event) ToBinary() ([]byte, error) {
-	return json.Marshal(*e)
+func (e *Event) ToBinary() []byte {
+	event, err := json.Marshal(*e)
+	if err != nil {
+		fmt.Println("Error while trying to marshal event: ", err)
+	}
+
+	return event
 }

@@ -17,6 +17,7 @@ import (
 
 var maxX, maxY int
 var recentX, recentY = 30, 30
+var lastDirection = 2 // initialized with the up-left value
 var currentAccessToken string
 var currentTrackID string
 var trackResponse models.TrackResponse
@@ -100,8 +101,6 @@ func UpdateAccessTokenAfter(timeout int, refreshToken string) {
 	}
 }
 
-// TODO: Here I probably need to notify the frontend every 3 seconds whether a song is currently playing or not,
-// TODO: So dont forget to send a notification into the "out" channel of the socket here later on
 func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 	for {
 		trackID, ok := GetCurrentTrackID()
@@ -117,15 +116,11 @@ func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 
 func notifyFrontend() {
 	isPlaying := map[string]bool{"isPlaying": true}
-	frontendData := &models.Event{
+
+	*out <- (&models.Event{
 		Name:    "isPlaying",
 		Content: isPlaying,
-	}
-	rawFrontendData, err := frontendData.ToBinary()
-	if err != nil {
-		fmt.Println("Error while trying to marshal frontendData in notifyFrontend: ", err)
-	}
-	*out <- rawFrontendData
+	}).ToBinary()
 }
 
 func GetCurrentTrackID() (string, bool){
@@ -143,8 +138,6 @@ func GetCurrentTrackID() (string, bool){
 	}
 	defer response.Body.Close()
 
-	// The check "contentLength == 0" may be insufficient and I might need to provide more complex measures
-	// in order to assure that the response.Body is actually empty
 	if response.StatusCode == 204 || response.ContentLength == 0 {
 		return "", false
 	}
@@ -200,16 +193,13 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
 	currentDirection := getRandomNumInRange(0, 7)
 
-	for numberOfSteps >= 0 && isPositionOnCanvas(positionAfterStep(stepSize, currentDirection)) {
+	for numberOfSteps >= 0 && differentDirection(currentDirection) && isPositionOnCanvas(positionAfterStep(stepSize, currentDirection)) {
 		randomColorIndex := rand.Intn(len(colorPalette))
 		currentColor := colorPalette[randomColorIndex]
-		err := sendToFrontend(currentColor, stepSize, int(ellipseHeight), int(ellipseWidth), recentX, recentY, trackResponse.Name)
-		if err != nil {
-			fmt.Println("Error while trying to send data to frontend: ", err)
-		}
+		sendToFrontend(currentColor, stepSize, int(ellipseHeight), int(ellipseWidth), recentX, recentY, trackResponse.Name)
+
 		numberOfSteps--
 	}
-
 }
 
 func getColorForCurrentTrack() [5]models.RGB {
@@ -330,7 +320,12 @@ func positionAfterStep(stepSize, currentDirection int) []int {
 	}
 }
 
-// Y: 829 | X: 1680
+func differentDirection(currentDirection int) bool {
+	// TODO: check whether you do not head backwards
+	// TODO: for example if you went up 5 steps and compute another direction that says go down
+	// TODO: then you would essentially not see anything on the screen.
+}
+
 func isPositionOnCanvas(coordinates []int) bool {
 	currentX, currentY := coordinates[0], coordinates[1]
 	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0
@@ -341,7 +336,7 @@ func getRandomNumInRange(min, max int) int {
 	return rand.Intn(max - min) + min
 }
 
-func sendToFrontend(currentColor models.RGB, stepSize int, ellipseHeight int, ellipseWidth int, x int, y int, songName string) error {
+func sendToFrontend(currentColor models.RGB, stepSize int, ellipseHeight int, ellipseWidth int, x int, y int, songName string) {
 	dataPackage := models.ForFrontend{
 		StepSize:      stepSize,
 		ColorPalette:  currentColor,
@@ -351,16 +346,10 @@ func sendToFrontend(currentColor models.RGB, stepSize int, ellipseHeight int, el
 		Y:             y,
 		SongName:      songName,
 	}
-	frontendData := &models.Event{
-		Name:    "data",
-		Content: dataPackage,
-	}
-	rawFrontendData, err := frontendData.ToBinary()
-	if err != nil {
-		return err
-	}
-	*out <- rawFrontendData
 
-	return nil
+	*out <- (&models.Event{
+		Name:    "coordinates",
+		Content: dataPackage,
+	}).ToBinary()
 }
 
