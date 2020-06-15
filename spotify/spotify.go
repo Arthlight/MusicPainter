@@ -200,6 +200,8 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 
 		numberOfSteps--
 	}
+
+	lastDirection = currentDirection
 }
 
 func getColorForCurrentTrack() [5]models.RGB {
@@ -321,9 +323,18 @@ func positionAfterStep(stepSize, currentDirection int) []int {
 }
 
 func differentDirection(currentDirection int) bool {
-	// TODO: check whether you do not head backwards
-	// TODO: for example if you went up 5 steps and compute another direction that says go down
-	// TODO: then you would essentially not see anything on the screen.
+	counterparts := map[int]int{
+		0: 7,
+		7: 0,
+		1: 6,
+		6: 1,
+		2: 5,
+		5: 2,
+		3: 4,
+		4: 3,
+	}
+
+	return lastDirection != counterparts[currentDirection]
 }
 
 func isPositionOnCanvas(coordinates []int) bool {
