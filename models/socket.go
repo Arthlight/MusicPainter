@@ -8,7 +8,6 @@ import (
 
 var (
 	upgrader = websocket.Upgrader{
-		HandshakeTimeout:  20,
 		ReadBufferSize:    2048,
 		WriteBufferSize:   2048,
 		CheckOrigin: func(r *http.Request) bool {
@@ -47,23 +46,23 @@ func CreateNewWebsocket(w http.ResponseWriter, r *http.Request) (*WebSocket, err
 
 func (w *WebSocket) Reader() {
 	defer func() {
-		fmt.Printf("Error while trying to close Reader: %v", w.Conn.Close())
+		fmt.Printf("Error while trying to close Reader: %v\n", w.Conn.Close())
 	}()
 
 	for {
 		_, message, err := w.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseGoingAway) {
-				fmt.Printf("Error while trying to read message: %v", err)
+				fmt.Printf("Error while trying to read message: %v\n", err)
 			}
 			break
 		}
 
 		event, err := NewEventFromBinary(message)
 		if err != nil {
-			fmt.Printf("Error while trying to convert message from binary to struct: %v", err)
+			fmt.Printf("Error while trying to convert message from binary to struct: %v\n", err)
 		} else {
-			fmt.Printf("Received from Frontend: %v", event.Content)
+			fmt.Printf("Received from Frontend: %v\n", event.Content)
 		}
 
 		if eventHandler, ok := w.Events[event.Name]; ok {

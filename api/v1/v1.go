@@ -9,7 +9,7 @@ import (
 func NewApiRouter() http.Handler {
 	router := chi.NewRouter()
 
-	router.Post("/ws", handler.Socket)
+	router.HandleFunc("/ws", handler.Socket)
 
 	return router
 }
