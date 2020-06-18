@@ -3,6 +3,7 @@ package handler
 import (
 	"Spotify-Visualizer/models"
 	"Spotify-Visualizer/spotify"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -15,7 +16,9 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 
 	ws.On("refresh_token", func(event *models.Event) {
 		fmt.Println("Successfully invoked \"refresh_token\" event!")
-		frontend := event.Content.(models.FromFrontend)
+		var frontend models.FromFrontend
+		json.Unmarshal([]byte(*event), frontend)
+		//frontend := event.Content.(models.FromFrontend)
 		accessToken, err := spotify.GetAccessToken(frontend.RefreshToken)
 		if err != nil {
 			fmt.Printf("Unable to get Access Token: %v", err)

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"time"
 )
 
 var (
 	upgrader = websocket.Upgrader{
+		HandshakeTimeout: time.Second * 30,
 		ReadBufferSize:    2048,
 		WriteBufferSize:   2048,
 		CheckOrigin: func(r *http.Request) bool {
@@ -46,7 +48,7 @@ func CreateNewWebsocket(w http.ResponseWriter, r *http.Request) (*WebSocket, err
 
 func (w *WebSocket) Reader() {
 	defer func() {
-		fmt.Printf("Error while trying to close Reader: %v\n", w.Conn.Close())
+		fmt.Println(w.Conn.Close())
 	}()
 
 	for {
