@@ -86,7 +86,7 @@ func (w *WebSocket) Writer() {
 				fmt.Println(err)
 				return
 			}
-
+			fmt.Println("sent msg successfully")
 			fmt.Println(writer.Write(message))
 			fmt.Println(writer.Close())
 		}

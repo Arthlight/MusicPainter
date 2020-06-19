@@ -104,18 +104,20 @@ func UpdateAccessTokenAfter(timeout int, refreshToken string) {
 func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 	for {
 		trackID, ok := GetCurrentTrackID()
+		fmt.Println(ok)
 		if ok {
 			currentTrackID = trackID
-			notifyFrontend()
+			notifyFrontend(true)
 			SetCurrentAudioFeaturesOfTrack()
 			sendNextCoordinatesFromSongInfoToFrontend()
 		}
+		notifyFrontend(false)
 		time.Sleep(time.Second * time.Duration(timeout))
 	}
 }
 
-func notifyFrontend() {
-	isPlaying := map[string]bool{"isPlaying": true}
+func notifyFrontend(flag bool) {
+	isPlaying := map[string]bool{"isPlaying": flag}
 
 	*out <- (&models.Event{
 		Name:    "isPlaying",
@@ -151,7 +153,6 @@ func GetCurrentTrackID() (string, bool){
 		fmt.Println("Error while trying to unmarshal response body in getCurrentTrackID: ", err)
 		return "", false
 	}
-	fmt.Println(string(body))
 	if !trackResponse.IsPlaying {
 		return "", false
 	}
@@ -181,7 +182,6 @@ func SetCurrentAudioFeaturesOfTrack() {
 	if err != nil {
 		fmt.Println("Error reading response body in SetCurrentAudioFeaturesOfTrack: ", err)
 	}
-	fmt.Println(string(body))
 	err = json.Unmarshal(body, &audioFeatures)
 }
 
@@ -189,7 +189,8 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 	colorPalette := getColorForCurrentTrack()
 	ellipseWidth, ellipseHeight := getEllipseWidthHeight()
 	stepRange := getStepRange()
-	stepSize := getRandomNumInRange(int(audioFeatures.Valence), int(2 * audioFeatures.Valence))
+	stepSize := getRandomNumInRange(int(audioFeatures.Valence + 1), int(3 * audioFeatures.Valence + 1))
+	fmt.Println("stepsize: ", stepSize)
 	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
 	currentDirection := getRandomNumInRange(0, 7)
 
@@ -263,19 +264,19 @@ func getEllipseWidthHeight() (float64, float64) {
 func getStepRange() [2]int {
 	switch {
 	case audioFeatures.Tempo > 150:
-		return [2]int{2, 4}
+		return [2]int{2, 6}
 	case audioFeatures.Tempo > 140:
-		return [2]int{3, 7}
+		return [2]int{3, 9}
 	case audioFeatures.Tempo > 120:
-		return [2]int{4, 10}
+		return [2]int{4, 12}
 	case audioFeatures.Tempo > 100:
-		return [2]int{5, 13}
+		return [2]int{5, 15}
 	case audioFeatures.Tempo > 80:
-		return [2]int{8, 20}
+		return [2]int{8, 22}
 	case audioFeatures.Tempo > 60:
-		return [2]int{10, 25}
+		return [2]int{10, 27}
 	default:
-		return [2]int{11, 27}
+		return [2]int{11, 29}
 	}
 }
 
@@ -357,7 +358,7 @@ func sendToFrontend(currentColor models.RGB, stepSize int, ellipseHeight int, el
 		Y:             y,
 		SongName:      songName,
 	}
-
+	fmt.Println("X: ", dataPackage.X, "Y: ", dataPackage.Y)
 	*out <- (&models.Event{
 		Name:    "coordinates",
 		Content: dataPackage,

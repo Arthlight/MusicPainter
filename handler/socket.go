@@ -17,8 +17,8 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	ws.On("refresh_token", func(event *models.Event) {
 		fmt.Println("Successfully invoked \"refresh_token\" event!")
 		var frontend models.FromFrontend
-		json.Unmarshal([]byte(*event), frontend)
-		//frontend := event.Content.(models.FromFrontend)
+		eventAsByte, _ := json.Marshal(event.Content)
+		fmt.Println(json.Unmarshal(eventAsByte, &frontend))
 		accessToken, err := spotify.GetAccessToken(frontend.RefreshToken)
 		if err != nil {
 			fmt.Printf("Unable to get Access Token: %v", err)
