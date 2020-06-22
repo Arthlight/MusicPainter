@@ -31,4 +31,6 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		go spotify.UpdateAccessTokenAfter(50, frontend.RefreshToken)
 		go spotify.LookForCurrentlyPlayingSongWithTimeOut(2)
 	})
+
+	fmt.Println("Successfully upgraded incoming request to websocket connection!")
 }

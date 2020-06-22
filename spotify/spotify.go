@@ -110,8 +110,9 @@ func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 			notifyFrontend(true)
 			SetCurrentAudioFeaturesOfTrack()
 			sendNextCoordinatesFromSongInfoToFrontend()
+		} else {
+			notifyFrontend(false)
 		}
-		notifyFrontend(false)
 		time.Sleep(time.Second * time.Duration(timeout))
 	}
 }

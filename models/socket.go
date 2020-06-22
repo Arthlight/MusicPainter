@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"time"
 )
 
 var (
 	upgrader = websocket.Upgrader{
-		HandshakeTimeout: time.Second * 30,
 		ReadBufferSize:    2048,
 		WriteBufferSize:   2048,
 		CheckOrigin: func(r *http.Request) bool {
@@ -78,7 +76,10 @@ func (w *WebSocket) Writer() {
 		select {
 		case message, ok := <- w.Out:
 			if !ok {
-				fmt.Println(w.Conn.WriteMessage(websocket.CloseMessage, []byte{}))
+				err := w.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					fmt.Println(err)
+				}
 				return
 			}
 			writer, err := w.Conn.NextWriter(websocket.TextMessage)
