@@ -16,7 +16,7 @@ import (
 )
 
 var maxX, maxY int
-var recentX, recentY = 30, 30
+var recentX, recentY = 100, 100
 var lastDirection = 2 // initialized with the up-left value
 var currentAccessToken string
 var currentTrackID string
@@ -104,7 +104,6 @@ func UpdateAccessTokenAfter(timeout int, refreshToken string) {
 func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 	for {
 		trackID, ok := GetCurrentTrackID()
-		fmt.Println(ok)
 		if ok {
 			currentTrackID = trackID
 			notifyFrontend(true)
@@ -188,12 +187,13 @@ func SetCurrentAudioFeaturesOfTrack() {
 
 func sendNextCoordinatesFromSongInfoToFrontend() {
 	colorPalette := getColorForCurrentTrack()
-	ellipseWidth, ellipseHeight := getEllipseWidthHeight()
+	ellipseWidth, ellipseHeight := getEllipseWidthHeight(8)
 	stepRange := getStepRange()
 	stepSize := getRandomNumInRange(int(audioFeatures.Valence + 1), int(3 * audioFeatures.Valence + 1))
 	fmt.Println("stepsize: ", stepSize)
 	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
 	currentDirection := getRandomNumInRange(0, 7)
+	fmt.Println("currentDirection: ", currentDirection)
 
 	for numberOfSteps >= 0 && differentDirection(currentDirection) && isPositionOnCanvas(positionAfterStep(stepSize, currentDirection)) {
 		randomColorIndex := rand.Intn(len(colorPalette))
@@ -256,8 +256,8 @@ func getColorForCurrentTrack() [5]models.RGB {
 	}
 }
 
-func getEllipseWidthHeight() (float64, float64) {
-	value := audioFeatures.Liveness * 10
+func getEllipseWidthHeight(factor float64) (float64, float64) {
+	value := (audioFeatures.Liveness * factor) * factor
 
 	return value, value
 }
@@ -265,19 +265,19 @@ func getEllipseWidthHeight() (float64, float64) {
 func getStepRange() [2]int {
 	switch {
 	case audioFeatures.Tempo > 150:
-		return [2]int{2, 6}
+		return [2]int{4, 8}
 	case audioFeatures.Tempo > 140:
-		return [2]int{3, 9}
+		return [2]int{5, 11}
 	case audioFeatures.Tempo > 120:
-		return [2]int{4, 12}
+		return [2]int{6, 14}
 	case audioFeatures.Tempo > 100:
-		return [2]int{5, 15}
+		return [2]int{7, 17}
 	case audioFeatures.Tempo > 80:
-		return [2]int{8, 22}
+		return [2]int{10, 24}
 	case audioFeatures.Tempo > 60:
-		return [2]int{10, 27}
+		return [2]int{12, 29}
 	default:
-		return [2]int{11, 29}
+		return [2]int{13, 32}
 	}
 }
 
@@ -341,7 +341,7 @@ func differentDirection(currentDirection int) bool {
 
 func isPositionOnCanvas(coordinates []int) bool {
 	currentX, currentY := coordinates[0], coordinates[1]
-	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0
+	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 15
 }
 
 func getRandomNumInRange(min, max int) int {
