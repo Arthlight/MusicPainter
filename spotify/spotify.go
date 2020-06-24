@@ -189,8 +189,7 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 	colorPalette := getColorForCurrentTrack()
 	ellipseWidth, ellipseHeight := getEllipseWidthHeight(8)
 	stepRange := getStepRange()
-	stepSize := getRandomNumInRange(int(audioFeatures.Valence + 1), int(3 * audioFeatures.Valence + 1))
-	fmt.Println("stepsize: ", stepSize)
+	stepSize := getRandomNumInRange(int(audioFeatures.Valence + 1), int(3 * (audioFeatures.Valence + 1)))
 	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
 	currentDirection := getRandomNumInRange(0, 7)
 	fmt.Println("currentDirection: ", currentDirection)
@@ -202,7 +201,7 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 
 		numberOfSteps--
 	}
-
+	fmt.Println("broke out of for loop")
 	lastDirection = currentDirection
 }
 
@@ -335,13 +334,14 @@ func differentDirection(currentDirection int) bool {
 		3: 4,
 		4: 3,
 	}
-
+	fmt.Println("is different direction: ", lastDirection != counterparts[currentDirection])
 	return lastDirection != counterparts[currentDirection]
 }
 
 func isPositionOnCanvas(coordinates []int) bool {
 	currentX, currentY := coordinates[0], coordinates[1]
-	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 15
+	fmt.Println("is on canvas: ", currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 10, "X: ", currentX, "Y: ", currentY)
+	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 10
 }
 
 func getRandomNumInRange(min, max int) int {
