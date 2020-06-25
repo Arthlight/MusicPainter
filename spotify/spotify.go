@@ -16,7 +16,7 @@ import (
 )
 
 var maxX, maxY int
-var recentX, recentY = 100, 100
+var recentX, recentY = 300, 300
 var lastDirection = 2 // initialized with the up-left value
 var currentAccessToken string
 var currentTrackID string
@@ -194,9 +194,17 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 	currentDirection := getRandomNumInRange(0, 7)
 	fmt.Println("currentDirection: ", currentDirection)
 
-	for numberOfSteps >= 0 && differentDirection(currentDirection) && isPositionOnCanvas(positionAfterStep(stepSize, currentDirection)) {
+	for numberOfSteps >= 0 && differentDirection(currentDirection) {
+		if !isNextStepValid(stepSize, currentDirection) {
+			break
+		}
+		if recentX < 0 {
+			panic("recentX was set to less than 0")
+		}
 		randomColorIndex := rand.Intn(len(colorPalette))
 		currentColor := colorPalette[randomColorIndex]
+		fmt.Println("X: ", recentX, "Y: ", recentY)
+		fmt.Println("Number of steps: ", numberOfSteps)
 		sendToFrontend(currentColor, stepSize, int(ellipseHeight), int(ellipseWidth), recentX, recentY, trackResponse.Name)
 
 		numberOfSteps--
@@ -280,44 +288,68 @@ func getStepRange() [2]int {
 	}
 }
 
-func positionAfterStep(stepSize, currentDirection int) []int {
+func isNextStepValid(stepSize, currentDirection int) bool {
 	switch currentDirection {
 	case 0:
 		// go up
+		if !isPositionOnCanvas(recentX, recentY - stepSize) {
+			return false
+		}
 		recentY = recentY - stepSize
-		return []int{recentX, recentY}
+		return true
 	case 1:
 		// go up-right
+		if !isPositionOnCanvas(recentX + stepSize, recentY - stepSize) {
+			return false
+		}
 		recentX = recentX + stepSize
 		recentY = recentY - stepSize
-		return []int{recentX, recentY}
+		return true
 	case 2:
 		// go up-left
+		if !isPositionOnCanvas(recentX - stepSize, recentY - stepSize) {
+			return false
+		}
 		recentX = recentX - stepSize
 		recentY = recentY - stepSize
-		return []int{recentX, recentY}
+		return true
 	case 3:
 		// go left
+		if !isPositionOnCanvas(recentX - stepSize, recentY) {
+			return false
+		}
 		recentX = recentX - stepSize
-		return []int{recentX, recentY}
+		return true
 	case 4:
 		// go right
+		if !isPositionOnCanvas(recentX + stepSize, recentY) {
+			return false
+		}
 		recentX = recentX + stepSize
-		return []int{recentX, recentY}
+		return true
 	case 5:
 		// go down-right
+		if !isPositionOnCanvas(recentX + stepSize, recentY + stepSize) {
+			return false
+		}
 		recentX = recentX + stepSize
 		recentY = recentY + stepSize
-		return []int{recentX, recentY}
+		return true
 	case 6:
 		// go down-left
+		if !isPositionOnCanvas(recentX - stepSize, recentY + stepSize) {
+			return false
+		}
 		recentX = recentX - stepSize
 		recentY = recentY + stepSize
-		return []int{recentX, recentY}
+		return true
 	case 7:
 		// go down
+		if !isPositionOnCanvas(recentX, recentY + stepSize) {
+			return false
+		}
 		recentY = recentY + stepSize
-		return []int{recentX, recentY}
+		return true
 	default:
 		panic("Invalid case in switch statement")
 	}
@@ -338,10 +370,9 @@ func differentDirection(currentDirection int) bool {
 	return lastDirection != counterparts[currentDirection]
 }
 
-func isPositionOnCanvas(coordinates []int) bool {
-	currentX, currentY := coordinates[0], coordinates[1]
-	fmt.Println("is on canvas: ", currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 10, "X: ", currentX, "Y: ", currentY)
-	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 10
+func isPositionOnCanvas(currentX, currentY int) bool {
+	fmt.Println("is on canvas: ", currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0, "X: ", currentX, "Y: ", currentY)
+	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0
 }
 
 func getRandomNumInRange(min, max int) int {
@@ -359,7 +390,6 @@ func sendToFrontend(currentColor models.RGB, stepSize int, ellipseHeight int, el
 		Y:             y,
 		SongName:      songName,
 	}
-	fmt.Println("X: ", dataPackage.X, "Y: ", dataPackage.Y)
 	*out <- (&models.Event{
 		Name:    "coordinates",
 		Content: dataPackage,

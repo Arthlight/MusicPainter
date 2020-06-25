@@ -78,23 +78,24 @@ func (w *WebSocket) Writer() {
 			if !ok {
 				err := w.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				if err != nil {
-					fmt.Println(err)
+					panic(err)
 				}
 				return
 			}
 			writer, err := w.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				fmt.Println(err)
-				return
+				panic(err)
 			}
-			fmt.Println("sent msg successfully")
 			_, err = writer.Write(message)
 			if err != nil {
 				fmt.Println("Error while trying to send msg: ", err)
+				panic(err)
 			}
 			err = writer.Close()
 			if err != nil {
 				fmt.Println("Error while trying to close connection: ", err)
+				panic(err)
 			}
 		}
 	}
