@@ -16,7 +16,7 @@ import (
 )
 
 var maxX, maxY int
-var recentX, recentY = 300, 300
+var recentX, recentY = 500, 500
 var lastDirection = 2 // initialized with the up-left value
 var currentAccessToken string
 var currentTrackID string
@@ -272,19 +272,19 @@ func getEllipseWidthHeight(factor float64) (float64, float64) {
 func getStepRange() [2]int {
 	switch {
 	case audioFeatures.Tempo > 150:
-		return [2]int{4, 8}
+		return [2]int{9, 13}
 	case audioFeatures.Tempo > 140:
-		return [2]int{5, 11}
+		return [2]int{10, 16}
 	case audioFeatures.Tempo > 120:
-		return [2]int{6, 14}
+		return [2]int{11, 19}
 	case audioFeatures.Tempo > 100:
-		return [2]int{7, 17}
+		return [2]int{12, 22}
 	case audioFeatures.Tempo > 80:
-		return [2]int{10, 24}
+		return [2]int{15, 29}
 	case audioFeatures.Tempo > 60:
-		return [2]int{12, 29}
+		return [2]int{17, 34}
 	default:
-		return [2]int{13, 32}
+		return [2]int{18, 37}
 	}
 }
 
