@@ -72,30 +72,29 @@ func (w *WebSocket) Reader() {
 }
 
 func (w *WebSocket) Writer() {
+
+writer:
 	for {
 		select {
-		case message, ok := <- w.Out:
+		case message, ok := <-w.Out:
 			if !ok {
-				err := w.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-				if err != nil {
-					panic(err)
-				}
+				w.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 			writer, err := w.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				fmt.Println(err)
-				panic(err)
+				break writer
 			}
 			_, err = writer.Write(message)
 			if err != nil {
 				fmt.Println("Error while trying to send msg: ", err)
-				panic(err)
+				break writer
 			}
 			err = writer.Close()
 			if err != nil {
 				fmt.Println("Error while trying to close connection: ", err)
-				panic(err)
+				break writer
 			}
 		}
 	}
