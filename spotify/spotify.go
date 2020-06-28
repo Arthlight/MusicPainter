@@ -198,9 +198,6 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 		if !isNextStepValid(stepSize, currentDirection) {
 			break
 		}
-		if recentX < 0 {
-			panic("recentX was set to less than 0")
-		}
 		randomColorIndex := rand.Intn(len(colorPalette))
 		currentColor := colorPalette[randomColorIndex]
 		fmt.Println("X: ", recentX, "Y: ", recentY)
@@ -264,7 +261,7 @@ func getColorForCurrentTrack() [5]models.RGB {
 }
 
 func getEllipseWidthHeight(factor float64) (float64, float64) {
-	value := (audioFeatures.Liveness * factor) * factor
+	value := (audioFeatures.Liveness + 0.5 * factor) * factor
 
 	return value, value
 }
@@ -272,19 +269,19 @@ func getEllipseWidthHeight(factor float64) (float64, float64) {
 func getStepRange() [2]int {
 	switch {
 	case audioFeatures.Tempo > 150:
-		return [2]int{9, 13}
+		return [2]int{14, 18}
 	case audioFeatures.Tempo > 140:
-		return [2]int{10, 16}
+		return [2]int{15, 21}
 	case audioFeatures.Tempo > 120:
-		return [2]int{11, 19}
+		return [2]int{16, 24}
 	case audioFeatures.Tempo > 100:
-		return [2]int{12, 22}
+		return [2]int{17, 27}
 	case audioFeatures.Tempo > 80:
-		return [2]int{15, 29}
+		return [2]int{20, 34}
 	case audioFeatures.Tempo > 60:
-		return [2]int{17, 34}
+		return [2]int{23, 38}
 	default:
-		return [2]int{18, 37}
+		return [2]int{26, 42}
 	}
 }
 
