@@ -15,15 +15,13 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws.On("refresh_token", func(event *models.Event) {
-		fmt.Println("Successfully invoked \"refresh_token\" event!")
 		var frontend models.FromFrontend
 		eventAsByte, _ := json.Marshal(event.Content)
 		fmt.Println(json.Unmarshal(eventAsByte, &frontend))
 		accessToken, err := spotify.GetAccessToken(frontend.RefreshToken)
 		if err != nil {
 			fmt.Printf("Unable to get Access Token: %v", err)
-			return // TODO: Maybe enhance this a little bit here and send a notif to the frontend that the refreshtoken
-			       // TODO: is expired, but you can't know that here for certain so additional checks would be required for that
+			return
 		}
 		spotify.InitializeAccessToken(accessToken)
 		spotify.SetXAndY(frontend.X, frontend.Y)
