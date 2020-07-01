@@ -15,6 +15,7 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws.On("refresh_token", func(event *models.Event) {
+		fmt.Println("Successfully invoked \"refresh_token\" event")
 		var frontend models.FromFrontend
 		eventAsByte, _ := json.Marshal(event.Content)
 		fmt.Println(json.Unmarshal(eventAsByte, &frontend))
