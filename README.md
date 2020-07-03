@@ -3,7 +3,7 @@ Music Painter is a simple app that lets you connect your [Spotify](https://www.s
 
 The Frontend for this webapp can be found [here](https://github.com/Arthlight/MusicPainter-Frontend).
 
-# Demo
+# Demo :movie_camera:
 ![](Demo/Demo.gif)
 
 # Structure :open_file_folder:
