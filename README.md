@@ -1,5 +1,5 @@
 # :art: :musical_note: MusicPainter
-Music Painter is a simple app that lets you connect your [Spotify](https://www.spotify.com) account and analyses the music you are currently listening to. The recommended way of use is letting the app run in the background while listening to your favourite playlists. Music Painter will then go along and paint a customized picture according to the metadata of all the songs you choose to listen to.
+Music Painter is a simple app that lets you connect your [Spotify](https://www.spotify.com) account and analyses the music you are currently listening to. The recommended way of use is letting the app run in the background while listening to your favourite playlists. Music Painter will then go along and paint a customized picture according to the metadata of all the songs you choose to listen to. (☞ ͡° ͜ʖ ͡°)☞
 
 The Frontend for this webapp can be found [here](https://github.com/Arthlight/MusicPainter-Frontend).
 
