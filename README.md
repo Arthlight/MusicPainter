@@ -41,7 +41,7 @@ You can visit the live version [here]() - **TODO: ADD LIVE VERSION**
 **With Goland**:
 - [Goland](https://www.jetbrains.com/go/) >=2020.1
 - ```$ git clone https://github.com/Arthlight/MusicPainter.git```
-- Open the project with Goland and click on the attached Terminal on the bottom
+- Open the project with Goland and click on the attached Terminal on the bottom.
 - ```$ go run main.go```
 - Open http://localhost:4000/
 
