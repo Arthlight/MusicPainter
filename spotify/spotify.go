@@ -193,7 +193,6 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 	stepSize := getRandomNumInRange(int(audioFeatures.Valence + 1), int(3 * (audioFeatures.Valence + 1)))
 	numberOfSteps := getRandomNumInRange(stepRange[0], stepRange[1])
 	currentDirection := getRandomNumInRange(0, 7)
-	fmt.Println("currentDirection: ", currentDirection)
 
 	for numberOfSteps >= 0 && differentDirection(currentDirection) {
 		if !isNextStepValid(stepSize, currentDirection) {
@@ -201,13 +200,10 @@ func sendNextCoordinatesFromSongInfoToFrontend() {
 		}
 		randomColorIndex := rand.Intn(len(colorPalette))
 		currentColor := colorPalette[randomColorIndex]
-		fmt.Println("X: ", recentX, "Y: ", recentY)
-		fmt.Println("Number of steps: ", numberOfSteps)
 		sendToFrontend(currentColor, stepSize, int(ellipseHeight), int(ellipseWidth), recentX, recentY, trackResponse.Name)
 
 		numberOfSteps--
 	}
-	fmt.Println("broke out of for loop")
 	lastDirection = currentDirection
 }
 
