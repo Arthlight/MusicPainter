@@ -15,14 +15,16 @@ import (
 	"time"
 )
 
-var maxX, maxY int
-var recentX, recentY = 500, 500
-var lastDirection = 2 // initialized with the up-left value
-var currentAccessToken string
-var currentTrackID string
-var trackResponse models.TrackResponse
-var audioFeatures models.AudioFeatures
-var out *chan []byte
+var (
+	maxX, maxY int
+	recentX, recentY = 500, 500
+	lastDirection = 2 // initialized with the up-left value
+	currentAccessToken string
+	currentTrackID string
+	trackResponse models.TrackResponse
+	audioFeatures models.AudioFeatures
+	out *chan []byte
+)
 
 
 func SetPipeline(cptr *chan []byte) {
