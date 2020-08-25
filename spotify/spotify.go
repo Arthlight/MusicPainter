@@ -362,7 +362,6 @@ func differentDirection(currentDirection int) bool {
 		3: 4,
 		4: 3,
 	}
-	fmt.Println("is different direction: ", lastDirection != counterparts[currentDirection])
 	return lastDirection != counterparts[currentDirection]
 }
 
