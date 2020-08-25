@@ -367,7 +367,6 @@ func differentDirection(currentDirection int) bool {
 }
 
 func isPositionOnCanvas(currentX, currentY int) bool {
-	fmt.Println("is on canvas: ", currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0, "X: ", currentX, "Y: ", currentY)
 	return currentX < maxX && currentX >= 0 && currentY < maxY && currentY >= 0
 }
 
