@@ -106,7 +106,6 @@ func UpdateAccessTokenAfter(timeout int, refreshToken string) {
 func LookForCurrentlyPlayingSongWithTimeOut(timeout int) {
 	for {
 		trackID, ok := GetCurrentTrackID()
-		fmt.Printf("Is song currently playing: %t", ok)
 		if ok {
 			currentTrackID = trackID
 			notifyFrontend(true)
